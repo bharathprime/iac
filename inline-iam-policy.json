@@ -1,0 +1,156 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "UnconditionalPermissions",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:DescribeInstances",
+				"ec2:DescribeSecurityGroups",
+				"ec2:DescribeTags",
+				"ec2:DescribeInstanceTypes",
+				"ec2:DescribeImages",
+				"ec2:DescribeVolumes",
+				"ec2:DescribeKeyPairs",
+				"ec2:DescribeVpcs",
+				"ec2:DescribeSubnets",
+				"ec2:CreateSecurityGroup",
+				"ec2:CreateTags",
+				"ec2:RunInstances",
+				"ec2:CreateVolume",
+				"ec2:AttachVolume",
+				"ec2:DescribeAddresses",
+				"ec2:DescribeAvailabilityZones",
+				"ssm:DescribeInstanceInformation",
+				"ssm:GetDocument",
+				"ssm:DescribeDocument",
+				"ssm:ListDocuments",
+				"ssm:StartSession",
+				"ssm:SendCommand",
+				"ssm:TerminateSession",
+				"ssm:DescribeSessions",
+				"ssm:GetConnectionStatus",
+				"ssm:GetCommandInvocation",
+				"ssm:ListCommands",
+				"cloudformation:CreateUploadBucket",
+				"cloudformation:ValidateTemplate",
+				"cloudformation:GetTemplate",
+				"cloudformation:GetTemplateSummary",
+				"cloudformation:ListStacks",
+				"cloudformation:DescribeStacks",
+				"iam:GetInstanceProfile",
+				"s3:CreateBucket",
+				"s3:PutObject",
+				"s3:GetObject",
+				"s3:DeleteObject",
+				"s3:ListBucket",
+				"s3:PutBucketPolicy",
+				"s3:GetBucketPolicy"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "ConditionalResourceTagPermissions",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:*",
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:DeleteSecurityGroup",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:RevokeSecurityGroupIngress",
+				"ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+				"ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+				"ec2:ModifySecurityGroupRules",
+				"ec2:DescribeSecurityGroupRules",
+				"cloudformation:*"
+			],
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"aws:ResourceTag/Name": "user1"
+				}
+			}
+		},
+		{
+			"Sid": "ConditionalRequestTagPermissions",
+			"Effect": "Allow",
+			"Action": [
+				"cloudformation:CreateStack"
+			],
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"aws:RequestTag/Name": "user1"
+				}
+			}
+		},
+		{
+			"Sid": "ConditionalResourceTagPermissionsLower",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:*",
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:DeleteSecurityGroup",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:RevokeSecurityGroupIngress",
+				"ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+				"ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+				"ec2:ModifySecurityGroupRules",
+				"ec2:DescribeSecurityGroupRules",
+				"cloudformation:*"
+			],
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"aws:ResourceTag/name": "user1"
+				}
+			}
+		},
+		{
+			"Sid": "ConditionalRequestTagPermissionsLower",
+			"Effect": "Allow",
+			"Action": [
+				"cloudformation:CreateStack"
+			],
+			"Resource": "*",
+			"Condition": {
+				"StringEquals": {
+					"aws:RequestTag/name": "user1"
+				}
+			}
+		},
+		{
+			"Sid": "IAMPassRoleToEC2",
+			"Effect": "Allow",
+			"Action": "iam:PassRole",
+			"Resource": "*",
+			"Condition": {
+				"StringLike": {
+					"iam:PassedToService": "ec2.amazonaws.com"
+				}
+			}
+		},
+		{
+			"Sid": "AllowIAMRoleManagement",
+			"Effect": "Allow",
+			"Action": [
+				"iam:CreateRole",
+				"iam:PutRolePolicy",
+				"iam:AttachRolePolicy",
+				"iam:CreateInstanceProfile",
+				"iam:AddRoleToInstanceProfile",
+				"iam:DeleteRole",
+				"iam:RemoveRoleFromInstanceProfile",
+				"iam:DeleteInstanceProfile",
+				"iam:DeleteRolePolicy",
+				"iam:DetachRolePolicy",
+				"iam:GetRole",
+				"iam:ListInstanceProfilesForRole",
+				"iam:TagRole"
+			],
+			"Resource": "*"
+		}
+	]
+}
