@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates an EC2 instance with SSM Session Manager access (No SSH).
+
+Parameters:
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t3.nano
+
+  VpcId:
+    Description: VPC where the EC2 instance will be created
+    Type: AWS::EC2::VPC::Id
+
+  SubnetId:
+    Description: Public Subnet where the EC2 instance will be launched
+    Type: AWS::EC2::Subnet::Id
+
+  InstanceName:
+    Description: Name of the EC2 instance (required)
+    Type: String
+
+Resources:
+  EC2SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${InstanceName}-ssm-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - ec2.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Name
+          Value: !Sub "${InstanceName}-ssm-role"
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "${InstanceName}-instance-profile"
+      Roles:
+        - !Ref EC2SSMRole
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${InstanceName}-sg"
+      GroupDescription: Security Group for EC2 instance (No SSH)
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Ref InstanceName  # Tag Name with InstanceName
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      ImageId: ami-01bfa473cd77d6efc  # Update to latest Ubuntu AMI if necessary
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref SubnetId
+          GroupSet:
+            - !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Ref InstanceName  # Tag Name with InstanceName
+
+Outputs:
+  InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref EC2Instance
+
+  SSMCommand:
+    Description: "Use this command to connect via SSM Session Manager"
+    Value: !Sub "aws ssm start-session --target ${EC2Instance}"
