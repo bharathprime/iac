@@ -35,6 +35,7 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Tags:
         - Key: Name
           Value: !Sub "${InstanceName}-ssm-role"
