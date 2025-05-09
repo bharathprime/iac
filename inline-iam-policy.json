@@ -39,13 +39,7 @@
 				"cloudformation:ListStacks",
 				"cloudformation:DescribeStacks",
 				"iam:GetInstanceProfile",
-				"s3:CreateBucket",
-				"s3:PutObject",
-				"s3:GetObject",
-				"s3:DeleteObject",
-				"s3:ListBucket",
-				"s3:PutBucketPolicy",
-				"s3:GetBucketPolicy"
+				"s3:*"
 			],
 			"Resource": "*"
 		},
@@ -167,6 +161,18 @@
 					]
 				}
 			}
+		},
+		{
+			"Sid": "DenyS3DeleteActions",
+			"Effect": "Deny",
+			"Action": [
+				"s3:DeleteObject",
+				"s3:DeleteObjectVersion",
+				"s3:DeleteBucket",
+				"s3:DeleteBucketPolicy",
+				"s3:DeleteBucketWebsite"
+			],
+			"Resource": "*"
 		}
 	]
 }
