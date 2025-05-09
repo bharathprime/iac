@@ -61,7 +61,7 @@ Resources:
     Properties:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref EC2InstanceProfile
-      ImageId: ami-01bfa473cd77d6efc  # Update to latest Ubuntu AMI if necessary
+      ImageId: ami-0d627da264bd6b092  # Update to latest Ubuntu AMI if necessary
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
