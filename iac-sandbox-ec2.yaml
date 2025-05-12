@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates 3 EC2 instances (Deimos, Diva, Doner) with SSM and full S3 access.
+
+Parameters:
+  VpcId:
+    Description: VPC where the EC2 instances will be created
+    Type: AWS::EC2::VPC::Id
+
+  SubnetId:
+    Description: Public Subnet where the EC2 instances will be launched
+    Type: AWS::EC2::Subnet::Id
+
+  DeimosInstanceType:
+    Type: String
+    Default: g6e.48xlarge
+    Description: EC2 instance type for Deimos
+
+  DivaInstanceType:
+    Type: String
+    Default: u-6tb1.56xlarge
+    Description: EC2 instance type for Diva
+
+  DonerInstanceType:
+    Type: String
+    Default: g6.16xlarge
+    Description: EC2 instance type for Doner
+
+Resources:
+  SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "ssm-role-${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - ec2.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Tags:
+        - Key: Name
+          Value: !Sub "ssm-role-${AWS::StackName}"
+
+  SSMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "ssm-instance-profile-${AWS::StackName}"
+      Roles:
+        - !Ref SSMRole
+
+  DeimosSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for Deimos EC2 (No SSH)
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub "deimos-sg-${AWS::StackName}"
+
+  DivaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for Diva EC2 (No SSH)
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub "diva-sg-${AWS::StackName}"
+
+  DonerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for Doner EC2 (No SSH)
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub "doner-sg-${AWS::StackName}"
+
+  DeimosEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref DeimosInstanceType
+      IamInstanceProfile: !Ref SSMInstanceProfile
+      ImageId: ami-0ee83ccdd823c86a6
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref SubnetId
+          GroupSet:
+            - !Ref DeimosSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "deimos-${AWS::StackName}"
+
+  DivaEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref DivaInstanceType
+      IamInstanceProfile: !Ref SSMInstanceProfile
+      ImageId: ami-0ee83ccdd823c86a6
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref SubnetId
+          GroupSet:
+            - !Ref DivaSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "diva-${AWS::StackName}"
+
+  DonerEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref DonerInstanceType
+      IamInstanceProfile: !Ref SSMInstanceProfile
+      ImageId: ami-0ee83ccdd823c86a6
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          SubnetId: !Ref SubnetId
+          GroupSet:
+            - !Ref DonerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "doner-${AWS::StackName}"
+
+Outputs:
+  DeimosInstanceId:
+    Description: Deimos EC2 Instance ID
+    Value: !Ref DeimosEC2
+
+  DivaInstanceId:
+    Description: Diva EC2 Instance ID
+    Value: !Ref DivaEC2
+
+  DonerInstanceId:
+    Description: Doner EC2 Instance ID
+    Value: !Ref DonerEC2
+
+  SSMCommandDeimos:
+    Description: SSM command for Deimos
+    Value: !Sub "aws ssm start-session --target ${DeimosEC2}"
+
+  SSMCommandDiva:
+    Description: SSM command for Diva
+    Value: !Sub "aws ssm start-session --target ${DivaEC2}"
+
+  SSMCommandDoner:
+    Description: SSM command for Doner
+    Value: !Sub "aws ssm start-session --target ${DonerEC2}"
